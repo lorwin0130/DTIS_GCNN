@@ -1,2 +1,2 @@
 # DTIS_GCNN
-drug target interactions using gcn
+drug target interactions prediction using gcn
