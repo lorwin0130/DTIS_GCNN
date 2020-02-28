@@ -9,7 +9,6 @@ from NeuralGraph.processing import data_parser
 from NeuralGraph.util import Timer
 
 
-
 def main():
     with Timer() as t1:
         data_path = '/home/ubuntu/wangzhongxu/gcnn2/NGFP/dataset'
@@ -39,5 +38,5 @@ def main():
 
 if __name__ == '__main__':
     BATCH_SIZE = 4
-    N_EPOCH = 20
+    N_EPOCH = 1000
     main()

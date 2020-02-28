@@ -31,9 +31,6 @@ class GraphConvAutoEncoder(nn.Module):
                 Ab, Bb, Eb, yb = Ab.to(dev), Bb.to(dev), Eb.to(dev), yb.to(dev)
                 optimizer.zero_grad()
                 nf, sf, onf, osf = self.forward(Ab, Eb)
-                # ix = yb == yb
-                # print('aaaaaaa:{}'.format(ix))
-                # nf, sf, onf, osf = nf[ix], sf[ix], onf[ix], osf[ix]
                 loss = criterion(nf, onf) + criterion(sf, osf)
                 loss.backward()
                 optimizer.step()
@@ -89,7 +86,7 @@ class QSAR(nn.Module):
                 y_ = self.forward(Ab, Bb, Eb, Nb, Vb)
                 loss = criterion(T.max(y_,1).values, yb.view(-1))
                 loss_train += loss
-                acc_train += (y_.argmax(dim=1).float()==yb).float().mean().item()
+                acc_train += (y_.argmax(dim=1).float()==yb.view(-1)).float().mean().item()
                 loss.backward()
                 optimizer.step()
             loss_train, acc_train = loss_train/len(loader_train), acc_train/len(loader_train)
@@ -113,7 +110,7 @@ class QSAR(nn.Module):
             Ab, Bb, Eb, Nb, Vb, yb = Ab.to(dev), Bb.to(dev), Eb.to(dev), Nb.to(dev), Vb.to(dev), yb.to(dev)
             y_ = self.forward(Ab, Bb, Eb, Nb, Vb)
             loss += criterion(T.max(y_,1).values, yb.view(-1)).item()
-            acc += (y_.argmax(dim=1).float()==yb).float().mean().item()
+            acc += (y_.argmax(dim=1).float()==yb.view(-1)).float().mean().item()
         return loss / len(loader), acc / len(loader)
 
     def predict(self, loader):

@@ -3,6 +3,7 @@ import math
 import numpy as np
 from NeuralGraph.preprocessing import tensorise_smiles, tensorise_pocket
 import torch as T
+import pickle
 
 """ 
 1.下载102个pdb
@@ -247,7 +248,7 @@ def get_smiles(ism_file):
     return ism_lst
 
 
-def data_parser(data_path, pd_filename='pre_data_test.txt'):
+def data_parser(data_path, pd_filename='pd_test.txt'):
     pd_file = '{}/{}'.format(data_path, pd_filename)
     pd_lst = []
     with open(pd_file,'r',encoding='utf-8') as f:
@@ -274,6 +275,38 @@ def pd_to_input(pd_lst, data_path, max_degree=6, max_atoms=80, max_degree_p=None
         input = T.cat(input,0)
         out.append(input)
     return out
+
+
+def pd_to_pickle(save_file, pd_lst, data_path, max_degree=6, max_atoms=80, max_degree_p=None, max_atoms_p=None):
+    # pd_lst = data_parser(pd_file)
+    input_lst = []
+    for target_name, pdb_id, smile, label in pd_lst:
+        pdb_file = '{}/pdb/{}.pdb'.format(data_path, pdb_id)
+        cl_file = '{}/dud-e/{}/crystal_ligand.mol2'.format(data_path, target_name.lower())
+        ff_file = '{}/ff/{}.ff'.format(data_path, pdb_id)
+        node_lst, edge_lst = vectorize_pdb(pdb_file, cl_file, ff_file)
+        node_tensor, verge_tensor = tensorise_pocket(node_lst, edge_lst, max_degree=max_atoms_p, max_nodes=max_atoms_p)
+        atom_tensor, bond_tensor, edge_tensor = tensorise_smiles([smile], max_degree=max_degree, max_atoms=max_atoms)
+        label = T.from_numpy(np.array([int(label)])).float()
+        input_lst.append((atom_tensor[0], bond_tensor[0], edge_tensor[0], node_tensor, verge_tensor, label))
+    with open(save_file,'wb') as f:
+        pickle.dump(input_lst,f)
+
+
+def lst_to_out(input_lst):
+    out = []
+    for input in zip(*input_lst):
+        input = [i.unsqueeze(0) for i in input]
+        input = T.cat(input,0)
+        out.append(input)
+    return out
+
+
+def pickle_to_input(pickle_file):
+    input_lst = []
+    with open(pickle_file,'rb') as f:
+        input_lst = pickle.load(f)
+    return input_lst
 
 
 if __name__=='__main__':

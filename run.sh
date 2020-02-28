@@ -1,0 +1,1 @@
+python gcnn.py > log/log_D1000_B4_E1000.txt
