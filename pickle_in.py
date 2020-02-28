@@ -10,8 +10,8 @@ def lst_div(lst, batch_size=1000):
 def main():
     data_path = '/home/ubuntu/wangzhongxu/gcnn2/NGFP/dataset'
     save_dir = '/home/ubuntu/wangzhongxu/gcnn2/NGFP/dataset/pickle'
-    PD_FILE = 'pd_test.txt' # pre_data_all.txt
-    BATCH_SIZE = 6 # 1000
+    PD_FILE = 'pre_data_all.txt' # pre_data_all.txt
+    BATCH_SIZE = 1000 # 1000
     MAX_DEGREE = 6
     MAX_ATOMS = 80
     now, start = 0, 0

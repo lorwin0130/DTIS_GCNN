@@ -12,7 +12,7 @@ from NeuralGraph.util import Timer
 def main():
     with Timer() as t1:
         data_path = '/home/ubuntu/wangzhongxu/gcnn2/NGFP/dataset'
-        pd_filename = 'pre_data_test.txt'
+        pd_filename = 'pd_test.txt'
         pd_lst = data_parser(data_path, pd_filename)
         tmp_lst = [0 for _ in pd_lst]
         print('data parse:')

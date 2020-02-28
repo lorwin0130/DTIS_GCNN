@@ -9,9 +9,9 @@ def str_key(a):
     return ka
 
 
-def main():
+def pickle_out():
     save_dir = '/home/ubuntu/wangzhongxu/gcnn2/NGFP/dataset/pickle'
-    start, amount = 0, 4
+    start, amount = 0, 5
     input_lst = []
 
     with Timer() as t:
@@ -22,8 +22,8 @@ def main():
             # print(file)
             input_lst += pickle_to_input(file)
         out = lst_to_out(input_lst)
-        print(out[0].shape)
+        print('\nout length: {}\nout ctx shape: {}'.format(len(out), out[0].shape))
 
 
 if __name__ == '__main__':
-    main()
+    pickle_out()

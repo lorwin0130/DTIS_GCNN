@@ -274,6 +274,9 @@ def pd_to_input(pd_lst, data_path, max_degree=6, max_atoms=80, max_degree_p=None
         input = [i.unsqueeze(0) for i in input]
         input = T.cat(input,0)
         out.append(input)
+    # # debug info
+    # print(len(out))
+    # print(out[0].shape)
     return out
 
 
