@@ -48,3 +48,20 @@ class AllData(Dataset):
 
     def __len__(self):
         return len(self.label)
+
+
+class AllData_pk(Dataset):
+    def __init__(self, out):
+        self.atoms, self.bonds, self.edges, self.node, self.verge, self.label = self._featurize(out)
+
+    def _featurize(self, out):
+        return out
+
+    def __getitem__(self, i):
+        return self.atoms[i], self.bonds[i], self.edges[i], self.node[i], self.verge[i], self.label[i]
+
+    def split(self, batch_size):
+        return
+
+    def __len__(self):
+        return len(self.label)
