@@ -4,12 +4,17 @@ from NeuralGraph.dataset import AllData_pk
 from NeuralGraph.model import GraphConvAutoEncoder, QSAR
 from NeuralGraph.util import Timer
 from NeuralGraph.pickle_out import pickle_out
-
+from collections import Counter
+import numpy as np
 
 def main():
     print('\nTRAIN START!!!')
     with Timer() as t2:
-        train_set, valid_set = pickle_out(amount=5, random_state=None)
+        train_set, valid_set = pickle_out(start=1, amount=1, random_state=None)
+        # print(train_set[5].shape)
+        # print(valid_set[5].shape)
+        print('train:',Counter(train_set[5].view(-1).cpu().numpy().tolist()))
+        print('valid:',Counter(valid_set[5].view(-1).cpu().numpy().tolist()))
         train_set, valid_set = AllData_pk(train_set), AllData_pk(valid_set)
         print('pickle:')
 
@@ -28,6 +33,6 @@ def main():
 
 
 if __name__ == '__main__':
-    BATCH_SIZE = 4
+    BATCH_SIZE = 128
     N_EPOCH = 200
     main()

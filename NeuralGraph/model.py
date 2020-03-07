@@ -6,6 +6,7 @@ import numpy as np
 from torch import optim
 import time
 from .util import dev
+from collections import Counter
 
 
 class GraphConvAutoEncoder(nn.Module):
@@ -55,16 +56,20 @@ class QSAR(nn.Module):
     def forward(self, m_atoms, m_bonds, m_edges, p_atoms, p_edges):
         # for ligand
         m_atoms = self.gcn_mol_1(m_atoms, m_bonds, m_edges)
+        m_atoms = F.relu(m_atoms)
         # m_atoms = self.bn(m_atoms)
         # m_atoms = self.pool(m_atoms, m_edges)
         m_atoms = self.gcn_mol_2(m_atoms, m_bonds, m_edges)
+        m_atoms = F.relu(m_atoms)
         # m_atoms = self.bn(m_atoms)
         # m_atoms = self.pool(m_atoms, m_edges)
         fp_m = self.gop(m_atoms, m_bonds, m_edges)
 
         # for pocket
         p_atoms = self.gcn_pro_1(p_atoms, p_edges)
+        p_atoms = F.relu(p_atoms)
         p_atoms = self.gcn_pro_2(p_atoms, p_edges)
+        p_atoms = F.relu(p_atoms)
         fp_p = self.gop_p(p_atoms, p_edges)
 
         fp = T.cat([fp_m, fp_p], dim=1)
@@ -80,6 +85,7 @@ class QSAR(nn.Module):
         for epoch in range(epochs):
             t0 = time.time()
             loss_train, acc_train = 0.0,0.0
+            # print(len(loader_train),len(loader_valid))
             for Ab, Bb, Eb, Nb, Vb, yb in loader_train:
                 Ab, Bb, Eb, Nb, Vb, yb = Ab.to(dev), Bb.to(dev), Eb.to(dev), Nb.to(dev), Vb.to(dev), yb.to(dev)
                 optimizer.zero_grad()
@@ -111,6 +117,10 @@ class QSAR(nn.Module):
             y_ = self.forward(Ab, Bb, Eb, Nb, Vb)
             loss += criterion(T.max(y_,1).values, yb.view(-1)).item()
             acc += (y_.argmax(dim=1).float()==yb.view(-1)).float().mean().item()
+            # acc_tensor = (y_.argmax(dim=1).float().cpu()==yb.view(-1).cpu())
+            # print('a:',Counter(acc_tensor.numpy()))
+            # print('b:',Counter(y_.argmax(dim=1).float().cpu().numpy().tolist()))
+            # print('c:',Counter(yb.view(-1).float().cpu().numpy().tolist()))
         return loss / len(loader), acc / len(loader)
 
     def predict(self, loader):

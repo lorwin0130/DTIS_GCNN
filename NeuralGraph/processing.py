@@ -299,7 +299,7 @@ def lst_to_out(input_lst):
         input = [i.unsqueeze(0) for i in input]
         input = T.cat(input,0)
         out.append(input)
-    # print(type(out),len(out),type(out[0]),out[0].shape)
+    print(type(out),len(out),type(out[0]),out[0].shape)
     return out
 
 
