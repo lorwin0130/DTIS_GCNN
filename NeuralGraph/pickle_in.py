@@ -9,6 +9,7 @@ def lst_div(lst, batch_size=1000):
 
 def main():
     data_path = '/home/ubuntu/wangzhongxu/gcnn2/NGFP/dataset'
+    # save_dir = '/home/ubuntu/wangzhongxu/gcnn2/NGFP/dataset/test'
     save_dir = '/home/ubuntu/wangzhongxu/gcnn2/NGFP/dataset/pickle'
     PD_FILE = 'pre_data_all.txt' # pre_data_all.txt
     BATCH_SIZE = 1000 # 1000
@@ -29,6 +30,7 @@ def main():
             pd_to_pickle(save_file, pd_lst, data_path, max_degree=MAX_DEGREE, max_atoms=MAX_ATOMS)
             print('processing: {}/{} ({}-{} of {})'.format(now, batch_size, begin_idx, end_idx, all_size))
         now+=1
+        break
 
 
 if __name__ == '__main__':

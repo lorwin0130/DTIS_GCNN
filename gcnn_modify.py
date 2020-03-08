@@ -7,10 +7,11 @@ from NeuralGraph.pickle_out import pickle_out
 from collections import Counter
 import numpy as np
 
+
 def main():
     print('\nTRAIN START!!!')
     with Timer() as t2:
-        train_set, valid_set = pickle_out(start=1, amount=1, random_state=None)
+        train_set, valid_set = pickle_out(start=0, amount=1, random_state=None)
         # print(train_set[5].shape)
         # print(valid_set[5].shape)
         print('train:',Counter(train_set[5].view(-1).cpu().numpy().tolist()))
@@ -20,7 +21,7 @@ def main():
 
     with Timer() as t3:
         print(len(train_set), len(valid_set))
-        train_loader = DataLoader(train_set, batch_size=BATCH_SIZE, shuffle=True, drop_last=True)
+        train_loader = DataLoader(train_set[0], batch_size=BATCH_SIZE, shuffle=True, drop_last=True)
         valid_loader = DataLoader(valid_set, batch_size=BATCH_SIZE)
         print('data load:')
 
@@ -33,6 +34,6 @@ def main():
 
 
 if __name__ == '__main__':
-    BATCH_SIZE = 128
+    BATCH_SIZE = 1 # 128
     N_EPOCH = 200
     main()

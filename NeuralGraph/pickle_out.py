@@ -26,19 +26,20 @@ def pickle_out(start=3, amount=5, test_size=0.2, random_state=0,save_dir='/home/
         for input in list(zip(*input_lst))[4]:
             max_nodes.append(input.shape[0])
             max_degree.append(input.shape[1])
-        print(max(max_nodes))
-        print(max(max_degree))
+        # print(max(max_nodes))
+        # print(max(max_degree))
+        print(Counter([i.numpy().tolist()[0] for i in list(zip(*input_lst))[5]]))
 
         # tuple to list
         input_lst = [list(input) for input in input_lst]
-        print(type(input_lst[0][3]))
-        
+        # print(type(input_lst[0][3]))
+
         # padaxis col_3 col_4
         for i in range(len(input_lst)):
             input_lst[i][3] = T.from_numpy(padaxis(input_lst[i][3], max(max_nodes), axis=0))
             input_lst[i][4] = T.from_numpy(padaxis(input_lst[i][4], max(max_nodes), axis=0, pad_value=-1))
             input_lst[i][4] = T.from_numpy(padaxis(input_lst[i][4], max(max_degree), axis=1, pad_value=-1))
-        print(type(input_lst[0][3]))
+        # print(type(input_lst[0][3]))
 
         # max_nodes, max_degree = [], []
         # for input in list(zip(*input_lst))[4]:

@@ -280,7 +280,9 @@ def pd_to_input(pd_lst, data_path, max_degree=6, max_atoms=80, max_degree_p=None
 def pd_to_pickle(save_file, pd_lst, data_path, max_degree=6, max_atoms=80, max_degree_p=None, max_atoms_p=None):
     # pd_lst = data_parser(pd_file)
     input_lst = []
+    label_lst = []
     for target_name, pdb_id, smile, label in pd_lst:
+        label_lst.append(label)
         pdb_file = '{}/pdb/{}.pdb'.format(data_path, pdb_id)
         cl_file = '{}/dud-e/{}/crystal_ligand.mol2'.format(data_path, target_name.lower())
         ff_file = '{}/ff/{}.ff'.format(data_path, pdb_id)
@@ -289,6 +291,8 @@ def pd_to_pickle(save_file, pd_lst, data_path, max_degree=6, max_atoms=80, max_d
         atom_tensor, bond_tensor, edge_tensor = tensorise_smiles([smile], max_degree=max_degree, max_atoms=max_atoms)
         label = T.from_numpy(np.array([int(label)])).float()
         input_lst.append((atom_tensor[0], bond_tensor[0], edge_tensor[0], node_tensor, verge_tensor, label))
+    from collections import Counter
+    print(Counter(label_lst))
     with open(save_file,'wb') as f:
         pickle.dump(input_lst,f)
 
