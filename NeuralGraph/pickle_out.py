@@ -26,9 +26,9 @@ def pickle_out(start=3, amount=5, test_size=0.2, random_state=0,save_dir='/home/
         for input in list(zip(*input_lst))[4]:
             max_nodes.append(input.shape[0])
             max_degree.append(input.shape[1])
-        # print(max(max_nodes))
-        # print(max(max_degree))
-        print(Counter([i.numpy().tolist()[0] for i in list(zip(*input_lst))[5]]))
+        # # print(max(max_nodes))
+        # # print(max(max_degree))
+        # print(Counter([i.numpy().tolist()[0] for i in list(zip(*input_lst))[5]]))
 
         # tuple to list
         input_lst = [list(input) for input in input_lst]
@@ -51,13 +51,13 @@ def pickle_out(start=3, amount=5, test_size=0.2, random_state=0,save_dir='/home/
         # split train test set
         tmp_lst = [0 for _ in range(len(input_lst))]
         train_set, valid_set, _, _ = train_test_split(input_lst, tmp_lst, test_size=test_size, random_state=random_state)
-        print(type(train_set))
-        print(type(train_set[0][0]))
+        # print(type(train_set))
+        # print(type(train_set[0][0]))
         train_out, valid_out = lst_to_out(train_set), lst_to_out(valid_set)
-        print('\ntrain data amount: {} datas'.format(len(train_out[0])))
-        print('train_out length: {}\ntrain_out ctx shape: {}'.format(len(train_out), train_out[4].shape))
-        print('\nvalid data amount: {} datas'.format(len(valid_out[0])))
-        print('valid_out length: {}\nvalid_out ctx shape: {}'.format(len(valid_out), valid_out[4].shape))
+        # print('\ntrain data amount: {} datas'.format(len(train_out[0])))
+        # print('train_out length: {}\ntrain_out ctx shape: {}'.format(len(train_out), train_out[4].shape))
+        # print('\nvalid data amount: {} datas'.format(len(valid_out[0])))
+        # print('valid_out length: {}\nvalid_out ctx shape: {}'.format(len(valid_out), valid_out[4].shape))
     return train_out, valid_out
 
 

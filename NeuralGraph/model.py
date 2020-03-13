@@ -50,7 +50,7 @@ class QSAR(nn.Module):
         self.bn = nn.BatchNorm2d(80)
         self.pool = GraphPool()
         self.fc1 = nn.Linear(hid_dim_m + hid_dim_p, 100)
-        #self.fc1 = nn.Linear(hid_dim_p , 100)
+        # self.fc1 = nn.Linear(hid_dim_p , 100)
         self.fc3 = nn.Linear(100, 100)
         self.fc2 = nn.Linear(100, n_class)
         self.to(dev)
@@ -85,7 +85,7 @@ class QSAR(nn.Module):
         out = F.sigmoid(self.fc2(tmp1))
         return out
 
-    def fit(self, loader_train, loader_valid, path, epochs=1000, early_stop=100, lr=1e-3):
+    def fit(self, loader_train, loader_valid, path, epochs=1000, early_stop=100, lr=1e-5):
         criterion = nn.BCELoss()
         optimizer = optim.Adam(self.parameters(), lr=lr)
         best_loss = np.inf
@@ -97,22 +97,25 @@ class QSAR(nn.Module):
             for Ab, Bb, Eb, Nb, Vb, yb in loader_train:
                 Ab, Bb, Eb, Nb, Vb, yb = Ab.to(dev), Bb.to(dev), Eb.to(dev), Nb.to(dev), Vb.to(dev), yb.to(dev)
                 optimizer.zero_grad()
-                print("yb:",yb)
-                #print('Vb:',Vb)
+                # print("yb:",yb)
+                # print('Vb:',Vb)
+                # y_ = self.forward(Ab, Bb, Eb, Nb, Vb)
                 y_ = self.forward(Ab, Bb, Eb, Nb/300.0, Vb/30.0)
-                print("y_:",y_)
+                # print("y_:",y_)
                 ix = yb == yb
                 yb, y_ = yb[ix], y_[ix]
                 loss = criterion(y_, yb)
-                print('loss:',loss.item())
+                #print('loss:',loss.item()) # batch loss
                 loss_train += loss
-                acc_train += 0#(y_.argmax(dim=1).float()==yb.view(-1)).float().mean().item()
+                acc_train += ((y_>0.5).type_as(yb)==yb).float().mean().item()
                 loss.backward()
                 optimizer.step()
             loss_train, acc_train = loss_train/len(loader_train), acc_train/len(loader_train)
             loss_valid, acc_valid = self.evaluate(loader_valid)
-            # print('[Epoch:%d/%d] %.1fs loss_train: ??? loss_valid: %f' % (epoch, epochs, time.time() - t0, loss_valid))
-            print('[Epoch:%d/%d] %.1fs loss_train: %.3f loss_valid: %.3f acc_train: %.3f acc_valid: %.3f' % (epoch, epochs, time.time() - t0, loss.item(), loss_valid, acc_train, acc_valid))
+
+            # print training info
+            print('[Epoch:%d/%d] %.1fs loss_train: %.3f %.3f loss_valid: %.3f acc_train: %.3f acc_valid: %.3f' % (epoch, epochs, time.time() - t0, loss.item(), loss_train, loss_valid, acc_train, acc_valid))
+            # print('[Epoch:%d/%d] %.1fs loss_train: %.3f loss_valid: %.3f acc_train: %.3f acc_valid: %.3f' % (epoch, epochs, time.time() - t0, loss_train, loss_valid, acc_train, acc_valid))
             if loss_valid < best_loss:
                 T.save(self, path + '.pkg')
                 print('[Performance] loss_valid is improved from %f to %f, Save model to %s' % (best_loss, loss_valid, path + '.pkg'))
@@ -132,11 +135,7 @@ class QSAR(nn.Module):
             ix = yb == yb
             yb, y_ = yb[ix], y_[ix]
             loss += criterion(y_, yb).item()
-            acc += 0#(y_.argmax(dim=1).float()==yb.view(-1)).float().mean().item()
-            # acc_tensor = (y_.argmax(dim=1).float().cpu()==yb.view(-1).cpu())
-            # print('a:',Counter(acc_tensor.numpy()))
-            # print('b:',Counter(y_.argmax(dim=1).float().cpu().numpy().tolist()))
-            # print('c:',Counter(yb.view(-1).float().cpu().numpy().tolist()))
+            acc += ((y_>0.5).type_as(yb)==yb).float().mean().item()
         return loss / len(loader), acc / len(loader)
 
     def predict(self, loader):
