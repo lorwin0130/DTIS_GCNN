@@ -6,9 +6,15 @@ import numpy as np
 from torch import optim
 import time
 from .util import dev
-from collections import Counter
+from sklearn.metrics import accuracy_score,roc_auc_score
 
 
+def roc_auc_score_FIXED(y_true, y_pred):
+    if len(np.unique(y_true)) == 1: # bug in roc_auc_score
+        return accuracy_score(y_true, np.rint(y_pred))
+    return roc_auc_score(y_true, y_pred)
+
+# https://github.com/vmasrani/gae_in_pytorch/blob/master/models.py
 class GraphConvAutoEncoder(nn.Module):
     def __init__(self, hid_dim_m, hid_dim_p, n_class):
         super(GraphConvAutoEncoder, self).__init__()
@@ -82,7 +88,7 @@ class QSAR(nn.Module):
         tmp = self.fc1(fp)
         
         tmp1 = self.fc3(tmp)
-        out = F.sigmoid(self.fc2(tmp1))
+        out = T.sigmoid(self.fc2(tmp1))
         return out
 
     def fit(self, loader_train, loader_valid, path, epochs=1000, early_stop=100, lr=1e-5):
@@ -92,7 +98,7 @@ class QSAR(nn.Module):
         last_saving = 0
         for epoch in range(epochs):
             t0 = time.time()
-            loss_train, acc_train = 0.0,0.0
+            loss_train, acc_train, auc_train = 0.0, 0.0, 0.0
             # print(len(loader_train),len(loader_valid))
             for Ab, Bb, Eb, Nb, Vb, yb in loader_train:
                 Ab, Bb, Eb, Nb, Vb, yb = Ab.to(dev), Bb.to(dev), Eb.to(dev), Nb.to(dev), Vb.to(dev), yb.to(dev)
@@ -107,15 +113,19 @@ class QSAR(nn.Module):
                 loss = criterion(y_, yb)
                 #print('loss:',loss.item()) # batch loss
                 loss_train += loss
-                acc_train += ((y_>0.5).type_as(yb)==yb).float().mean().item()
+                acc_train += accuracy_score((y_>0.5).type_as(yb).cpu(),yb.cpu())
+                # acc_train += ((y_>0.5).type_as(yb)==yb).float().mean().item()
+                auc_train += roc_auc_score_FIXED(yb.cpu().detach(),y_.cpu().detach())
                 loss.backward()
                 optimizer.step()
-            loss_train, acc_train = loss_train/len(loader_train), acc_train/len(loader_train)
-            loss_valid, acc_valid = self.evaluate(loader_valid)
+            loss_train, acc_train, auc_train = loss_train/len(loader_train), acc_train/len(loader_train), auc_train/len(loader_train)
+            loss_valid, acc_valid, auc_valid = self.evaluate(loader_valid)
 
             # print training info
-            print('[Epoch:%d/%d] %.1fs loss_train: %.3f %.3f loss_valid: %.3f acc_train: %.3f acc_valid: %.3f' % (epoch, epochs, time.time() - t0, loss.item(), loss_train, loss_valid, acc_train, acc_valid))
-            # print('[Epoch:%d/%d] %.1fs loss_train: %.3f loss_valid: %.3f acc_train: %.3f acc_valid: %.3f' % (epoch, epochs, time.time() - t0, loss_train, loss_valid, acc_train, acc_valid))
+            ## full info
+            # print('[Epoch:%d/%d] %.1fs loss_train: %.3f %.3f loss_valid: %.3f acc_train: %.3f acc_valid: %.3f auc_train: %.3f auc_valid: %.3f' % (epoch, epochs, time.time() - t0, loss.item(), loss_train, loss_valid, acc_train, acc_valid, auc_train, auc_valid))
+            ## simple info
+            print('[Epoch:%d/%d] %.1fs loss_train: %.3f loss_valid: %.3f auc_train: %.3f auc_valid: %.3f' % (epoch, epochs, time.time() - t0, loss_train, loss_valid, auc_train , auc_valid))
             if loss_valid < best_loss:
                 T.save(self, path + '.pkg')
                 print('[Performance] loss_valid is improved from %f to %f, Save model to %s' % (best_loss, loss_valid, path + '.pkg'))
@@ -127,7 +137,7 @@ class QSAR(nn.Module):
         return T.load(path + '.pkg')
 
     def evaluate(self, loader):
-        loss, acc = 0.0, 0.0
+        loss, acc, auc = 0.0, 0.0, 0.0
         criterion = nn.BCELoss()
         for Ab, Bb, Eb, Nb, Vb, yb in loader:
             Ab, Bb, Eb, Nb, Vb, yb = Ab.to(dev), Bb.to(dev), Eb.to(dev), Nb.to(dev), Vb.to(dev), yb.to(dev)
@@ -135,8 +145,10 @@ class QSAR(nn.Module):
             ix = yb == yb
             yb, y_ = yb[ix], y_[ix]
             loss += criterion(y_, yb).item()
-            acc += ((y_>0.5).type_as(yb)==yb).float().mean().item()
-        return loss / len(loader), acc / len(loader)
+            acc += accuracy_score((y_>0.5).type_as(yb).cpu(),yb.cpu())
+            # acc += ((y_>0.5).type_as(yb)==yb).float().mean().item()
+            auc += roc_auc_score_FIXED(yb.cpu().detach(),y_.cpu().detach())
+        return loss / len(loader), acc / len(loader), auc / len(loader)
 
     def predict(self, loader):
         score = []

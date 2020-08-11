@@ -3,4 +3,26 @@
 /output
 /log
 example.py
+
 run.sh
+/refer
+.vscode/
+ADaptive-Structural-Fingerprint/
+Backups/
+Cache/
+CachedData/
+CachedExtensions/
+Code Cache/
+Cookies
+Cookies-journal
+GPUCache/
+Graph_CNN/
+Network Persistent State
+User/
+languagepacks.json
+logs/
+machineid
+master.zip
+pyGAT/
+rapid_render.json
+storage.json

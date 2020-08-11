@@ -11,7 +11,7 @@ def str_key(a):
     return ka
 
 
-def pickle_out(start=3, amount=5, test_size=0.2, random_state=0,save_dir='/home/ubuntu/wangzhongxu/gcnn2/NGFP/dataset/pickle'):
+def pickle_out(start=0, amount=5, test_size=0.2, random_state=0,save_dir='/home/ubuntu/wangzhongxu/gcnn2/NGFP/dataset/pickle'):
     input_lst = []
     out = []
     with Timer() as t:
